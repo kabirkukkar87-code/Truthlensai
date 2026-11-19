@@ -1,0 +1,7 @@
+# TruthLens AI - Root Environment Reference (Placeholder Template)
+# Place real keys ONLY in backend/.env (which is strictly excluded by .gitignore)
+
+GEMINI_API_KEY=
+TAVILY_API_KEY=
+GEMINI_MODEL=gemini-3.1-flash-lite-preview
+PORT=8000

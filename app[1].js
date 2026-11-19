@@ -558,13 +558,20 @@ async function checkBackendHealth() {
   const statusDot = document.getElementById("backendStatusDot");
 
   try {
-    const res = await fetch(`${BACKEND_BASE}/api/health`);
+    let res = await fetch(`${BACKEND_BASE}/api/health`);
+    // Direct Netlify serverless fallback if rewrite wasn't applied
+    if (res.status === 404 && !BACKEND_BASE) {
+      try {
+        const fb = await fetch("/.netlify/functions/health");
+        if (fb.status !== 404) res = fb;
+      } catch {}
+    }
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     
     if (statusText) statusText.textContent = data.service || "AI Verification Service: Connected";
-    if (statusDot) statusDot.style.backgroundColor = "#10b981";
-    if (statusPill) statusPill.style.borderColor = "rgba(16, 185, 129, 0.4)";
+    if (statusDot) statusDot.style.backgroundColor = (data.status === "ok") ? "#10b981" : "#f59e0b";
+    if (statusPill) statusPill.style.borderColor = (data.status === "ok") ? "rgba(16, 185, 129, 0.4)" : "rgba(245, 158, 11, 0.4)";
   } catch (err) {
     if (statusText) statusText.textContent = "AI Verification Service: Temporarily Unavailable";
     if (statusDot) statusDot.style.backgroundColor = "#f87171";
@@ -593,16 +600,34 @@ async function apiVerify(payload, onProgress) {
   }, 1800);
 
   try {
-    const response = await fetch(`${BACKEND_BASE}/api/verify`, {
+    const reqBody = JSON.stringify({
+      type: payload.type || "text",
+      text: payload.text,
+      image_base64: payload.imageBase64,
+      target_language: State.currentLanguage
+    });
+
+    let response = await fetch(`${BACKEND_BASE}/api/verify`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        type: payload.type || "text",
-        text: payload.text,
-        image_base64: payload.imageBase64,
-        target_language: State.currentLanguage
-      })
+      body: reqBody
     });
+
+    // Netlify Fallback: If /api/verify returned 404, retry directly via /.netlify/functions/verify
+    if (response.status === 404 && !BACKEND_BASE) {
+      try {
+        const fallbackRes = await fetch("/.netlify/functions/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: reqBody
+        });
+        if (fallbackRes.status !== 404) {
+          response = fallbackRes;
+        }
+      } catch (e) {
+        // preserve original response
+      }
+    }
 
     clearInterval(timer);
 
@@ -631,14 +656,32 @@ async function apiTranslate(report, targetLang) {
     return report._translations[targetLang];
   }
 
-  const response = await fetch(`${BACKEND_BASE}/api/translate`, {
+  const reqBody = JSON.stringify({
+    report: report,
+    target_language: targetLang
+  });
+
+  let response = await fetch(`${BACKEND_BASE}/api/translate`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      report: report,
-      target_language: targetLang
-    })
+    body: reqBody
   });
+
+  // Netlify Fallback: If /api/translate returned 404, retry directly via /.netlify/functions/translate
+  if (response.status === 404 && !BACKEND_BASE) {
+    try {
+      const fallbackRes = await fetch("/.netlify/functions/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: reqBody
+      });
+      if (fallbackRes.status !== 404) {
+        response = fallbackRes;
+      }
+    } catch (e) {
+      // preserve original response
+    }
+  }
 
   if (!response.ok) {
     let errDetail = "Translation service failed.";

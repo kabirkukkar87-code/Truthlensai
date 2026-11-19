@@ -1,0 +1,12 @@
+{
+  "name": "truthlens-ai",
+  "version": "2.0.0",
+  "description": "TruthLens AI – Universal Fact-Checking & Misinformation Detection Platform",
+  "private": true,
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node serve.js"
+  }
+}

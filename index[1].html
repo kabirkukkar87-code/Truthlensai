@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TruthLens AI – Universal Fact-Checking & Misinformation Detection Platform</title>
+  <meta name="description" content="AI-powered investigative fact-checking platform verifying claims across 18 news categories with live web search evidence, bias analysis, and deep forensic reasoning.">
+  <link rel="stylesheet" href="styles.css">
+  <!-- In-browser PDF.js client text extractor -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    if (window.pdfjsLib) {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    }
+  </script>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container nav-wrapper">
+      <a href="#" class="brand">
+        <div class="brand-icon">TL</div>
+        <div>
+          <div class="brand-name">TruthLens AI</div>
+          <div style="font-size: 0.7rem; color: var(--text-muted);">Universal Fact-Checking Platform</div>
+        </div>
+        <span class="brand-badge">Live Grounded</span>
+      </a>
+
+      <div class="nav-actions">
+        <div class="status-pill" id="backendStatusPill">
+          <span class="status-dot" id="backendStatusDot"></span>
+          <span id="backendStatusText">AI Verification Service: Connected</span>
+        </div>
+        <a href="/TruthLens-AI.zip" download="TruthLens-AI.zip" class="btn btn-primary btn-sm" title="Download clean project ZIP">
+          📦 Download ZIP
+        </a>
+        <button id="openHistoryBtn" class="btn btn-secondary btn-sm" title="View past verification reports">
+          🕒 History
+        </button>
+        <button id="openSettingsBtn" class="btn btn-secondary btn-sm" title="System Status & Options">
+          ⚙️ System
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="container">
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <h1 class="hero-title">
+        Detect Misinformation with <span>Evidence-Based AI</span>
+      </h1>
+      <p class="hero-subtitle">
+        Investigate news across 18 categories with live web search, claim extraction, bias analysis, timeline verification, and multilingual reporting.
+      </p>
+
+      <div class="features-pills">
+        <span class="feature-tag">Claim Verification</span>
+        <span class="feature-tag">News Bias Analysis</span>
+        <span class="feature-tag">Source Credibility</span>
+        <span class="feature-tag">News Timeline</span>
+        <span class="feature-tag">Evidence Comparison</span>
+        <span class="feature-tag">Missing Context</span>
+        <span class="feature-tag">Headline Accuracy</span>
+        <span class="feature-tag">Manipulation Shield</span>
+        <span class="feature-tag">Multilingual Report</span>
+      </div>
+    </section>
+
+    <!-- Verification Intake Studio -->
+    <section class="studio-card">
+      <!-- Input Mode Tabs -->
+      <div class="tabs-header">
+        <button class="tab-btn active" data-tab="text">
+          📝 News Text / Claim
+        </button>
+        <button class="tab-btn" data-tab="url">
+          🔗 Webpage URL
+        </button>
+        <button class="tab-btn" data-tab="image">
+          🖼️ Image / Screenshot (OCR)
+        </button>
+        <button class="tab-btn" data-tab="pdf">
+          📄 PDF Document
+        </button>
+      </div>
+
+      <!-- Tab 1: Text Input -->
+      <div id="tab-text" class="tab-content active">
+        <div class="form-group">
+          <label class="form-label" for="newsTextInput">
+            Paste News Headline, Statement, Claim, or Full Article
+          </label>
+          <textarea 
+            id="newsTextInput" 
+            class="form-textarea" 
+            placeholder="e.g. NASA confirmed that the Earth will experience 15 days of total darkness this November..."
+          ></textarea>
+        </div>
+
+        <!-- Quick Sample Chips -->
+        <div class="samples-wrapper">
+          <span class="samples-label">Test Samples:</span>
+          <button class="sample-chip" data-text="NASA confirmed that the earth will experience 15 days of total darkness in November due to astronomical alignment.">
+            🌌 NASA 15 Days Darkness (Hoax)
+          </button>
+          <button class="sample-chip" data-text="The World Health Organization declared monkeypox a public health emergency of international concern.">
+            🏥 WHO Global Emergency (True)
+          </button>
+          <button class="sample-chip" data-text="Reserve Bank of India announces ban on 5000 rupee currency notes starting next week.">
+            💵 RBI Currency Ban (Fabricated)
+          </button>
+          <button class="sample-chip" data-text="World Bank projects India GDP growth rate to reach 6.6 percent for the fiscal year 2024-25.">
+            📈 World Bank GDP (Economic)
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab 2: URL Input -->
+      <div id="tab-url" class="tab-content">
+        <div class="form-group">
+          <label class="form-label" for="newsUrlInput">
+            Enter Article or Webpage URL
+          </label>
+          <input 
+            type="url" 
+            id="newsUrlInput" 
+            class="form-input" 
+            placeholder="https://example.com/breaking-news-article"
+          >
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem;">
+            TruthLens will retrieve live webpage evidence, extract primary claims, and verify them against independent sources.
+          </p>
+        </div>
+      </div>
+
+      <!-- Tab 3: Image / Screenshot Input -->
+      <div id="tab-image" class="tab-content">
+        <div id="imageDropzone" class="dropzone">
+          <div class="dropzone-icon">📷</div>
+          <div class="dropzone-title">Upload News Screenshot or Image</div>
+          <div class="dropzone-desc">Drag & drop PNG, JPG, or WEBP, or click to browse</div>
+          <input type="file" id="imageInput" accept="image/*" style="display: none;">
+        </div>
+
+        <div id="imagePreviewContainer" class="preview-container">
+          <img id="imagePreviewThumb" class="preview-thumbnail" alt="Screenshot Preview">
+          <div style="flex: 1;">
+            <div id="imageName" style="font-size: 0.85rem; font-weight: 600;"></div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Ready for Gemini Vision OCR and claim analysis</div>
+          </div>
+          <button id="removeImageBtn" class="btn btn-outline btn-sm">Remove</button>
+        </div>
+      </div>
+
+      <!-- Tab 4: PDF Document Input -->
+      <div id="tab-pdf" class="tab-content">
+        <div id="pdfDropzone" class="dropzone">
+          <div class="dropzone-icon">📑</div>
+          <div class="dropzone-title">Upload Official Document or PDF</div>
+          <div class="dropzone-desc">Drag & drop PDF document, or click to browse</div>
+          <input type="file" id="pdfInput" accept="application/pdf" style="display: none;">
+        </div>
+
+        <div id="pdfPreviewContainer" class="preview-container">
+          <div style="font-size: 1.5rem;">📄</div>
+          <div style="flex: 1;">
+            <div id="pdfName" style="font-size: 0.85rem; font-weight: 600;"></div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">In-browser PDF.js client text extractor enabled</div>
+          </div>
+          <button id="removePdfBtn" class="btn btn-outline btn-sm">Remove</button>
+        </div>
+      </div>
+
+      <!-- Studio Action Bar -->
+      <div class="studio-actions">
+        <div style="font-size: 0.8rem; color: var(--text-muted);">
+          Grounded with <strong>Gemini Flash</strong> + <strong>Tavily Search</strong>
+        </div>
+
+        <button id="verifyBtn" class="btn btn-primary btn-lg">
+          🔍 Investigate & Verify with AI
+        </button>
+      </div>
+    </section>
+
+    <!-- Real-Time Pipeline Progress Indicator -->
+    <section id="progressCard" class="progress-card">
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <h3 style="font-size: 0.95rem; font-weight: 700; color: #60a5fa;">
+          AI Investigation in Progress
+        </h3>
+        <span id="progressStatusText" style="font-size: 0.8rem; color: var(--text-secondary);">
+          Initializing verification pipeline...
+        </span>
+      </div>
+
+      <div class="pipeline-steps">
+        <div id="step-1" class="pipeline-step">
+          <div class="step-num">1</div>
+          <div class="step-info">
+            <h4>Claim Intake</h4>
+            <p>18 Categories</p>
+          </div>
+        </div>
+        <div id="step-2" class="pipeline-step">
+          <div class="step-num">2</div>
+          <div class="step-info">
+            <h4>Tavily Search</h4>
+            <p>Multi-source evidence</p>
+          </div>
+        </div>
+        <div id="step-3" class="pipeline-step">
+          <div class="step-num">3</div>
+          <div class="step-info">
+            <h4>Deep AI Audit</h4>
+            <p>Gemini reasoning</p>
+          </div>
+        </div>
+        <div id="step-4" class="pipeline-step">
+          <div class="step-num">4</div>
+          <div class="step-info">
+            <h4>Forensic Analysis</h4>
+            <p>Bias, timeline, context</p>
+          </div>
+        </div>
+        <div id="step-5" class="pipeline-step">
+          <div class="step-num">5</div>
+          <div class="step-info">
+            <h4>Synthesis</h4>
+            <p>Verdict & reporting</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         EDITORIAL VERIFICATION REPORT (REDESIGNED)
+         ====================================================================== -->
+    <div id="dashboardWrapper" class="dashboard-wrapper">
+
+      <!-- Report Header & Action Toolbar -->
+      <div class="report-header-bar">
+        <div class="report-title-area">
+          <h2 id="uiReportTitle">Verification Report</h2>
+          <div class="report-meta-subtitle">
+            <span id="uiAnalysisCompletedIn">Analysis completed in</span> <span id="timeElapsed" style="color: #60a5fa; font-weight: 700;">2.1s</span> • 
+            <span id="uiGroundedWithSearch">Grounded with live web search</span> • 
+            <span id="reportDateFormatted" style="color: var(--text-muted);">Today</span>
+          </div>
+        </div>
+
+        <div class="report-toolbar-controls">
+          <!-- Multi-Language Selector Dropdown -->
+          <div class="lang-selector-wrapper">
+            <label for="reportLangSelect">
+              <span>🌐</span> Language:
+            </label>
+            <select id="reportLangSelect" class="lang-select">
+              <option value="en">English</option>
+              <option value="hi">हिन्दी (Hindi)</option>
+              <option value="es">Español (Spanish)</option>
+              <option value="fr">Français (French)</option>
+              <option value="ar">العربية (Arabic)</option>
+            </select>
+          </div>
+
+          <div id="translationPill" class="translation-pill">
+            <span class="status-dot animate-pulse"></span>
+            <span id="uiTranslatingText">Translating report...</span>
+          </div>
+
+          <!-- Document Export Buttons -->
+          <button id="exportMdBtn" class="btn btn-outline btn-sm" title="Download report as Markdown">
+            ⬇️ Markdown
+          </button>
+          <button id="exportJsonBtn" class="btn btn-outline btn-sm" title="Download machine-readable JSON">
+            ⬇️ JSON
+          </button>
+          <button id="printReportBtn" class="btn btn-outline btn-sm" title="Print or save as PDF">
+            🖨️ Print / PDF
+          </button>
+        </div>
+      </div>
+
+      <!-- Part A: Verification Overview (Verdict, Score, Category, Submitted Content) -->
+      <div class="overview-grid">
+        
+        <!-- Left: Prominent Verdict Banner & Submitted Claim -->
+        <div class="editorial-card">
+          <div class="editorial-card-header">
+            <span class="editorial-card-title" id="uiCoreVerdictTitle">Core Verdict</span>
+            <span id="confidenceBadge" class="card-badge" style="background: rgba(59, 130, 246, 0.15); color: #93c5fd;">
+              Confidence: High
+            </span>
+          </div>
+
+          <div id="verdictBanner" class="verdict-banner likely-true">
+            <div id="verdictIcon" class="verdict-icon">✓</div>
+            <div class="verdict-details">
+              <h3 id="verdictTitle">LIKELY TRUE</h3>
+              <p id="verdictSummary">Summary of the verified claims and supporting facts.</p>
+            </div>
+          </div>
+
+          <!-- Submitted Claim Box -->
+          <div class="submitted-content-box">
+            <strong id="uiSubmittedContentTitle">Submitted Content Under Investigation</strong>
+            <div id="submittedClaimText" style="font-style: italic;"></div>
+          </div>
+
+          <!-- Category Pill & Verification Protocol -->
+          <div class="meta-pills-row">
+            <span class="meta-pill" id="categoryTitle">🏛️ Politics and Elections</span>
+            <span style="font-size: 0.75rem; color: var(--text-muted);" id="categoryProtocol">
+              Category Protocol: Independent multi-source cross-examination.
+            </span>
+          </div>
+        </div>
+
+        <!-- Right: Evidence Credibility Score Gauge -->
+        <div class="editorial-card gauge-card">
+          <div class="editorial-card-header" style="width: 100%; justify-content: center;">
+            <span class="editorial-card-title" id="uiCredibilityScoreTitle">Credibility Score</span>
+          </div>
+
+          <div class="radial-gauge">
+            <svg width="130" height="130">
+              <circle class="gauge-bg" cx="65" cy="65" r="50"></circle>
+              <circle id="gaugeVal" class="gauge-val" cx="65" cy="65" r="50"></circle>
+            </svg>
+            <div class="gauge-text">
+              <div id="gaugeScore" class="gauge-score">0</div>
+              <div class="gauge-label">out of 100</div>
+            </div>
+          </div>
+
+          <div id="credibilityNote" class="credibility-disclaimer">
+            Reflects evidentiary strength and corroboration from independent sources—not a statistical probability of truth.
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Part B: Executive Summary with Expandable Full Explanation -->
+      <section class="editorial-card executive-summary-wrapper">
+        <div class="editorial-card-header">
+          <span class="editorial-card-title" id="uiExecutiveSummaryTitle">Executive Summary</span>
+        </div>
+        <div id="executiveSummaryShort" class="summary-text-box"></div>
+        <div id="executiveSummaryFull" class="summary-full-details"></div>
+        <button id="toggleSummaryBtn" class="toggle-link-btn">
+          <span id="toggleSummaryText">Read Full Explanation</span> ▼
+        </button>
+      </section>
+
+      <!-- Part C: Claim-by-Claim Verification Cards -->
+      <section class="editorial-card" style="margin-bottom: 1.5rem;">
+        <div class="editorial-card-header">
+          <span class="editorial-card-title" id="uiClaimVerificationTitle">Claim Verification</span>
+          <span id="claimCountBadge" style="font-size: 0.75rem; color: var(--text-muted);">Atomic Factual Claims</span>
+        </div>
+        <div id="claimsContainer" class="claims-list">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+      <!-- Part D & E: Evidence Comparison & Source Credibility -->
+      <section class="editorial-card" style="margin-bottom: 1.5rem;">
+        <div class="editorial-card-header">
+          <span class="editorial-card-title" id="uiEvidenceComparisonTitle">Evidence Comparison</span>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Independent Authoritative Sources</span>
+        </div>
+        
+        <div class="evidence-comparison-container">
+          <!-- Supporting Sources Column -->
+          <div>
+            <div class="source-column-header" style="color: #34d399;">
+              <span>✓</span> <span id="uiSupportingSourcesHeader">Supporting Sources & Quotations</span>
+            </div>
+            <div id="supportingSourcesList"></div>
+          </div>
+
+          <!-- Contradicting Sources Column -->
+          <div>
+            <div class="source-column-header" style="color: #f87171;">
+              <span>✗</span> <span id="uiContradictingSourcesHeader">Contradicting Sources & Quotations</span>
+            </div>
+            <div id="contradictingSourcesList"></div>
+          </div>
+        </div>
+
+        <!-- Cross-Source Consensus Box -->
+        <div id="consensusContainer" class="consensus-box">
+          <div class="consensus-block">
+            <h5 id="uiCrossConsensusHeader" style="color: #60a5fa;">Cross-Source Consensus</h5>
+            <ul id="crossAgreements"></ul>
+          </div>
+          <div class="consensus-block">
+            <h5 id="uiCrossDivergencesHeader" style="color: #f472b6;">Cross-Source Divergences</h5>
+            <ul id="crossDivergences"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Part F: Additional Forensic Analysis (Collapsible Accordions - Collapsed by Default) -->
+      <section class="editorial-card" style="margin-bottom: 1.5rem;">
+        <div class="editorial-card-header">
+          <div>
+            <span class="editorial-card-title" id="uiAdditionalAnalysisTitle">Additional Analysis</span>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;" id="uiAdditionalAnalysisSubtitle">
+              Expand any section below for deep forensic breakdown
+            </div>
+          </div>
+        </div>
+
+        <div class="accordion-group">
+
+          <!-- Accordion 1: News Bias Analysis -->
+          <details id="accordion-bias" class="accordion-item">
+            <summary class="accordion-summary">
+              <div class="accordion-summary-left">
+                <span id="uiNewsBiasTitle">News Bias Analysis</span>
+                <span id="biasBadgeScore" class="accordion-summary-badge">Score: 0/100</span>
+              </div>
+              <span class="accordion-chevron">▼</span>
+            </summary>
+            <div class="accordion-body">
+              <div style="margin-bottom: 0.75rem;">
+                <div style="font-size: 0.85rem; font-weight: 700; margin-bottom: 0.35rem;">
+                  <span id="uiBiasOrientationLabel">Orientation:</span> <span id="biasCategoryText" style="color: #fbbf24;">Neutral</span>
+                </div>
+                <div id="biasIndicatorsContainer" style="display: flex; flex-wrap: wrap; gap: 0.35rem;"></div>
+              </div>
+              <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.45rem;" id="uiFlaggedSentencesHeader">
+                Flagged Sentences & Neutral Rewrites
+              </div>
+              <div id="biasDiffsContainer"></div>
+            </div>
+          </details>
+
+          <!-- Accordion 2: Headline Accuracy -->
+          <details id="accordion-headline" class="accordion-item">
+            <summary class="accordion-summary">
+              <div class="accordion-summary-left">
+                <span id="uiHeadlineAccuracyTitle">Headline Accuracy</span>
+                <span id="headlineScoreBadge" class="accordion-summary-badge">Score: 0/100</span>
+              </div>
+              <span class="accordion-chevron">▼</span>
+            </summary>
+            <div class="accordion-body">
+              <div style="margin-bottom: 0.5rem;">
+                <span id="uiClickbaitSeverityLabel">Clickbait Severity:</span> 
+                <span id="clickbaitRatingText" style="color: #fbbf24; font-weight: 700;">Low</span>
+              </div>
+              <div style="margin-bottom: 0.65rem;">
+                <strong id="uiRecommendedHeadlineLabel">Recommended Neutral Headline:</strong>
+                <div id="recommendedHeadlineToDisplay" style="color: #93c5fd; font-style: italic; margin-top: 0.2rem;"></div>
+              </div>
+              <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary);" id="uiSensationalExaggerationsHeader">
+                Sensationalist Exaggerations
+              </div>
+              <ul id="headlineExaggerationsList" style="padding-left: 1.15rem; color: var(--text-secondary); margin-top: 0.25rem;"></ul>
+            </div>
+          </details>
+
+          <!-- Accordion 3: News Timeline & Recycled News -->
+          <details id="accordion-timeline" class="accordion-item">
+            <summary class="accordion-summary">
+              <div class="accordion-summary-left">
+                <span id="uiNewsTimelineTitle">News Timeline & Recycled News</span>
+                <span id="timelineStatusBadge" class="accordion-summary-badge">Current Event</span>
+              </div>
+              <span class="accordion-chevron">▼</span>
+            </summary>
+            <div class="accordion-body">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.65rem;">
+                <div>
+                  <strong id="uiOriginalEventDateLabel">Original Event Date:</strong>
+                  <div id="originalEventDateText" style="color: #f472b6; font-weight: 600;"></div>
+                </div>
+                <div>
+                  <strong id="uiClaimedPublicationDateLabel">Claimed Publication Date:</strong>
+                  <div id="claimedDateText" style="color: var(--text-secondary);"></div>
+                </div>
+              </div>
+              <div>
+                <strong id="uiRelevanceAssessmentLabel">Relevance Assessment:</strong>
+                <div id="currentRelevanceText" style="color: var(--text-secondary); margin-top: 0.2rem;"></div>
+              </div>
+            </div>
+          </details>
+
+          <!-- Accordion 4: Missing Context -->
+          <details id="accordion-context" class="accordion-item">
+            <summary class="accordion-summary">
+              <div class="accordion-summary-left">
+                <span id="uiMissingContextTitle">Missing Context</span>
+              </div>
+              <span class="accordion-chevron">▼</span>
+            </summary>
+            <div class="accordion-body">
+              <div style="margin-bottom: 0.5rem;">
+                <strong id="uiOmittedBackgroundLabel">Omitted Background:</strong>
+                <div id="omittedBackgroundText" style="color: var(--text-secondary);"></div>
+              </div>
+              <div style="margin-bottom: 0.5rem;">
+                <strong id="uiIncompleteStatisticsLabel">Incomplete Statistics:</strong>
+                <div id="incompleteStatsText" style="color: var(--text-secondary);"></div>
+              </div>
+              <div style="margin-bottom: 0.5rem;">
+                <strong id="uiUnmentionedTimeframesLabel">Unmentioned Timeframes:</strong>
+                <div id="unmentionedTimeframesText" style="color: var(--text-secondary);"></div>
+              </div>
+              <div style="background: var(--bg-card); padding: 0.65rem; border-radius: 6px; margin-top: 0.5rem;">
+                <strong id="uiImpactOnPerceptionLabel" style="color: #fbbf24;">Impact on Public Perception:</strong>
+                <div id="contextImpactText" style="color: var(--text-main); margin-top: 0.2rem;"></div>
+              </div>
+            </div>
+          </details>
+
+          <!-- Accordion 5: Manipulation Analysis -->
+          <details id="accordion-manipulation" class="accordion-item">
+            <summary class="accordion-summary">
+              <div class="accordion-summary-left">
+                <span id="uiManipulationTitle">Manipulation Analysis</span>
+              </div>
+              <span class="accordion-chevron">▼</span>
+            </summary>
+            <div class="accordion-body">
+              <div class="manipulation-grid">
+                <div class="manipulation-metric">
+                  <span id="uiFearmongeringLabel">Fearmongering:</span>
+                  <span id="fearmongeringStatus"></span>
+                </div>
+                <div class="manipulation-metric">
+                  <span id="uiUrgencyFramingLabel">Urgency Framing:</span>
+                  <span id="urgencyStatus"></span>
+                </div>
+                <div class="manipulation-metric">
+                  <span id="uiArtificialOutrageLabel">Artificial Outrage:</span>
+                  <span id="outrageStatus"></span>
+                </div>
+                <div class="manipulation-metric">
+                  <span id="uiConspiracyFramingLabel">Conspiracy Framing:</span>
+                  <span id="conspiracyStatus"></span>
+                </div>
+              </div>
+              <div style="margin-bottom: 0.45rem;">
+                <strong id="uiPsychologicalImpactLabel">Psychological Reader Impact:</strong>
+                <div id="psychologicalImpactText" style="color: var(--text-secondary); margin-top: 0.15rem;"></div>
+              </div>
+              <div>
+                <strong id="uiObjectiveInterpretationLabel">Objective Interpretation:</strong>
+                <div id="objectiveInterpretationText" style="color: #34d399; margin-top: 0.15rem;"></div>
+              </div>
+            </div>
+          </details>
+
+          <!-- Accordion 6: Source Credibility Details -->
+          <details id="accordion-sourcecred" class="accordion-item">
+            <summary class="accordion-summary">
+              <div class="accordion-summary-left">
+                <span id="uiSourceCredibilityTitle">Source Credibility</span>
+                <span id="sourceTransparencyBadge" class="accordion-summary-badge">Score: 0/100</span>
+              </div>
+              <span class="accordion-chevron">▼</span>
+            </summary>
+            <div class="accordion-body">
+              <div style="margin-bottom: 0.65rem;">
+                <div><strong id="uiPublisherLabel">Publisher:</strong> <span id="publisherIdentityText" style="color: var(--text-secondary);"></span></div>
+                <div><strong id="uiAuthorLabel">Author Evaluation:</strong> <span id="authorEvaluationText" style="color: var(--text-secondary);"></span></div>
+                <div><strong id="uiInstitutionalLabel">Institutional Oversight:</strong> <span id="institutionalBackingText" style="color: var(--text-secondary);"></span></div>
+              </div>
+              <div class="source-cred-grid">
+                <div>
+                  <div id="uiVerifiableAssertionsHeader" style="color: #34d399; font-weight: 700; margin-bottom: 0.25rem;">✓ Verifiable Assertions</div>
+                  <ul id="verifiableAssertionsList" style="padding-left: 1.15rem; color: var(--text-secondary);"></ul>
+                </div>
+                <div>
+                  <div id="uiUnverifiedClaimsHeader" style="color: #f87171; font-weight: 700; margin-bottom: 0.25rem;">✗ Unverified Claims</div>
+                  <ul id="unverifiedClaimsList" style="padding-left: 1.15rem; color: var(--text-secondary);"></ul>
+                </div>
+              </div>
+            </div>
+          </details>
+
+        </div>
+      </section>
+
+      <!-- Part G: Final Assessment & Grounded Citations -->
+      <section class="editorial-card final-assessment-card">
+        <div class="editorial-card-header">
+          <span class="editorial-card-title" id="uiFinalAssessmentTitle">Final Assessment</span>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Transparent Grounding Audit</span>
+        </div>
+
+        <div class="reasoning-box">
+          <h4 id="uiReasoningForVerdictHeader" style="font-size: 0.85rem; font-weight: 700; color: #60a5fa; margin-bottom: 0.35rem;">
+            Reasoning for Verdict
+          </h4>
+          <p id="finalExplanationText"></p>
+        </div>
+
+        <div style="background: var(--bg-card-subtle); padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid var(--border-subtle);">
+          <strong id="uiLimitationsDisclosuresHeader" style="color: var(--text-secondary); font-size: 0.82rem;">
+            Methodological Disclosures & Limitations:
+          </strong>
+          <div id="transparencyLimitationsText" style="color: var(--text-muted); font-size: 0.8rem; margin-top: 0.25rem;"></div>
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+          <div id="uiSearchQueriesExecutedHeader" style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.35rem;">
+            Search Queries Executed:
+          </div>
+          <div id="executedQueriesContainer" style="display: flex; flex-wrap: wrap; gap: 0.35rem;"></div>
+        </div>
+
+        <div>
+          <div id="uiVerifiedCitationsHeader" style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 0.45rem;">
+            Clickable Live Citations:
+          </div>
+          <div id="citationsListContainer" class="citations-list-container"></div>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- System Status & Cache Modal -->
+  <div id="settingsModal" class="modal-overlay">
+    <div class="modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <h3 style="font-size: 1.15rem; font-weight: 700;">TruthLens System Status</h3>
+        <button id="closeSettingsBtn" class="btn btn-outline btn-sm">✕</button>
+      </div>
+
+      <div style="background: var(--bg-card); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid var(--border-subtle);">
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+          <span class="status-dot"></span>
+          <strong style="color: #34d399; font-size: 0.9rem;">AI Verification Service: Connected</strong>
+        </div>
+        <p style="font-size: 0.78rem; color: var(--text-secondary); line-height: 1.5;">
+          Credentials are securely loaded exclusively from the server-side environment (<code style="color: #93c5fd;">backend/.env</code>).
+          Zero API keys are exposed to the client or browser.
+        </p>
+      </div>
+
+      <div style="margin-bottom: 1.25rem; font-size: 0.82rem; line-height: 1.7; color: var(--text-secondary);">
+        <div>• <strong>AI Engine:</strong> Google Gemini 3.1 Flash-Lite (Server-Side)</div>
+        <div>• <strong>Live Search:</strong> Tavily Search API (Server-Side)</div>
+        <div>• <strong>Verification Categories:</strong> 18 Global News Domains</div>
+        <div>• <strong>Languages:</strong> English, Hindi, Spanish, French, Arabic</div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid var(--border-subtle);">
+        <button id="clearCacheBtn" class="btn btn-outline btn-sm">🗑️ Clear Local Cache</button>
+        <button onclick="document.getElementById('settingsModal').style.display='none'" class="btn btn-primary btn-sm">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Verification History Drawer -->
+  <aside id="historyDrawer" class="drawer">
+    <div class="drawer-header">
+      <h3 style="font-size: 1.05rem; font-weight: 700;">Verification History</h3>
+      <button id="closeHistoryBtn" class="btn btn-outline btn-sm">✕</button>
+    </div>
+    <div id="historyList" class="drawer-content"></div>
+    <div style="padding: 1rem; border-top: 1px solid var(--border-subtle); text-align: center;">
+      <button id="clearHistoryBtn" class="btn btn-outline btn-sm" style="width: 100%;">Clear History</button>
+    </div>
+  </aside>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p style="font-weight: 600; margin-bottom: 0.25rem;">TruthLens AI – Universal Fact-Checking Platform</p>
+      <p style="font-size: 0.75rem; color: var(--text-muted);">
+        Powered by Google Gemini & Tavily Live Search • Non-Partisan, Evidence-Based Verification.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Main JavaScript Controller -->
+  <script src="app.js"></script>
+</body>
+</html>
