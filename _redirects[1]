@@ -1,0 +1,3 @@
+/api/health     /.netlify/functions/health     200
+/api/verify     /.netlify/functions/verify     200
+/api/translate  /.netlify/functions/translate  200
