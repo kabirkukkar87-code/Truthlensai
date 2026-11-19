@@ -12,8 +12,12 @@ exports.handler = async (event, context) => {
     };
   }
 
-  const geminiKey = process.env.GEMINI_API_KEY;
-  const tavilyKey = process.env.TAVILY_API_KEY;
+  const geminiKey = process.env.AQ.Ab8RN6ILx7V0G2pWGKAau1WPoAt6M205RoKHIoi0A0-uLYFb9AAQ.Ab8RN6ILx7V0G2pWGKAau1WPoAt6M205RoKHIoi0A0-uLYFb9A;
+  const tavilyKey = process.env.tvly-1lF0LT-XRAyUdpif506vMDR4kmtv8PncyJJWlsKDQIvYcGBLR
+
+  
+
+  ;
   const isOk = Boolean(geminiKey && geminiKey.length > 5);
 
   return {
